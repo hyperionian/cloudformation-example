@@ -1,18 +1,55 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "AWS CloudFormation Sample Template VPC_with_PublicIPs_And_Private_DNS:.",
-
+  "Description" : "AWS CloudFormation template to create a VPC with 2 subnets, NAT gateway, EC2 jumphost, and private hosted DNS on AWS Route 53. This template creates AWS resources. You will be billed for the AWS resources used if you create a stack from this template",
+   "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "EC2 launch setup"
+                    },
+                    "Parameters": [
+                        "KeyName",
+                        "EC2InstanceType",
+                        "EC2NATInstanceType"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Allowed source IP for jumphost access"
+                    },
+                    "Parameters": [ 
+                        "JumpHostSource"
+                    ]
+                }
+            ],
+     "ParameterLabels": {
+                "KeyName": {
+                    "default": "Key pair name"
+                },
+                "EC2InstanceType": {
+                    "default": "EC2 Instance type for your jumphost"
+                },
+                "EC2NATInstaceType": {
+                    "default": "NAT instance type for NAT device"
+                },
+                
+                "JumpHostSource": {
+                    "default": "Source IP for jumphost access"
+                }
+            }
+        }
+    },
   "Parameters" : {
-
     "KeyName" : {
       "Description" : "Name of KeyPair used for EC2 access",
       "Type" : "AWS::EC2::KeyPair::KeyName",
       "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
     },
 
-    "SSHLocation" : {
-      "Description" : "Lockdown SSH access to the your IP",
+    "JumpHostSource" : {
+      "Description" : "Lockdown SSH access to the your allowed IP",
       "Type" : "String",
       "MinLength": "9",
       "MaxLength": "18",
@@ -25,9 +62,16 @@
       "Description" : "EC2 instance type",
       "Type" : "String",
       "Default" : "t2.small",
-      "AllowedValues" : [ "t1.micro", "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"]
-,
+      "AllowedValues" : [ "t1.micro", "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+     "EC2NATInstanceType" : {
+      "Description" : "EC2 NAT instance type",
+      "Type" : "String",
+      "Default" : "t2.small",
+      "AllowedValues" : [ "t1.micro", "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 NAT instance type."
     }
   },
 
@@ -196,7 +240,7 @@
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "VPC", "CIDR" ]},
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
-          { "Key" : "Network", "Value" : "Public" }
+          { "Key" : "Network", "Value" : "Public-Private" }
         ]
       }
     },
@@ -204,7 +248,7 @@
     "CustomDHCPOptionAssociation" : {
         "Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
         "Properties" : {
-          "VpcId" : {"Ref" : "VPC"},
+          "VPCId" : {"Ref" : "VPC"},
           "DhcpOptionsId" : {"Ref" : "CustomDHCPOptions"}
          }
     },
@@ -213,7 +257,7 @@
         "Type": "AWS::Route53::HostedZone",
         "Properties": {
             "HostedZoneConfig": {
-            "Comment": "Lab custom private zone"
+            "Comment": "Lab custom private DNS zone"
          },
             "Name": "csd.internal",
             "VPCs": [{
@@ -231,7 +275,7 @@
     "PublicSubnet" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
+        "VPCId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
@@ -243,7 +287,7 @@
    "PrivateSubnet" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
+        "VPCId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Private", "CIDR" ]},
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
@@ -265,7 +309,7 @@
     "GatewayToInternet" : {
        "Type" : "AWS::EC2::VPCGatewayAttachment",
        "Properties" : {
-         "VpcId" : { "Ref" : "VPC" },
+         "VPCId" : { "Ref" : "VPC" },
          "InternetGatewayId" : { "Ref" : "InternetGateway" }
        }
     },
@@ -273,7 +317,7 @@
     "PublicRouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
+        "VPCId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
           { "Key" : "Network", "Value" : "Public" }
@@ -302,7 +346,7 @@
     "PrivateRouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
-        "VpcId" : { "Ref" : "VPC" },
+        "VPCId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
           { "Key" : "Network", "Value" : "Private" }
@@ -323,7 +367,7 @@
    "PrivateSubnetRouteTableAssociation" : {
       "Type" : "AWS::EC2::SubnetRouteTableAssociation",
       "Properties" : {
-        "SubnetId" : { "Ref" : "Private" },
+        "SubnetId" : { "Ref" : "PrivateRouteTable" },
         "RouteTableId" : { "Ref" : "PrivateRouteTable" }
       }
     },
@@ -340,7 +384,7 @@
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable internal access to the NAT device",
-        "VpcId" : { "Ref" : "VpcId" },
+        "VpcId" : { "Ref" : "VPC" },
         "SecurityGroupIngress" : [
           { "IpProtocol" : "tcp", "FromPort" : "0",  "ToPort" : "65535",  "CidrIp" : "10.0.0.0/16" },
           { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0/16" } ,
@@ -355,10 +399,11 @@
       "DependsOn" : "GatewayToInternet",
       "Properties" : {
         "GroupDescription" : "NAT Instance",
-        "InstanceType" : { "Ref" : "EC2InstanceType" },
+        "InstanceType" : { "Ref" : "EC2NATInstanceType" },
         "KeyName"  : { "Ref" : "KeyName" },
+         "SourceDestCheck": "false",
         "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2NATAMI", { "Ref" : "AWS::Region" }, 
-                         { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2InstanceType" }, "Arch" ] } ] },
+                         { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2NATInstanceType" }, "Arch" ] } ] },
         "NetworkInterfaces" : [{
           "GroupSet"                 : [{ "Ref" : "NATSecurityGroup" }],
           "AssociatePublicIpAddress" : "true",
@@ -369,7 +414,7 @@
       }
     },
 
-    "EC2SecurityGroup" : {
+    "EC2JumpHostSG" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Enable access to the EC2 host",
@@ -378,8 +423,26 @@
           "IpProtocol" : "tcp",
           "FromPort" : "22",  
           "ToPort" : "22",
-          "CidrIp" : { "Ref" : "SSHLocation" }
+          "CidrIp" : { "Ref" : "JumpHostSource" }
         } ]
+      }
+    },
+  
+   "EC2JumpHost" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "GatewayToInternet",
+      "Properties" : {
+        "InstanceType" : { "Ref" : "EC2InstanceType" },
+        "KeyName"  : { "Ref" : "KeyName" },
+        "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, 
+                         { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2InstanceType" }, "Arch" ] } ] },
+        "NetworkInterfaces" : [{
+          "GroupSet"                 : [{ "Ref" : "EC2JumpHostSG" }],
+          "AssociatePublicIpAddress" : "true",
+          "DeviceIndex"              : "0",
+          "DeleteOnTermination"      : "true",
+          "SubnetId"                 : { "Ref" : "PublicSubnet" }
+        }]
       }
     }
   },
@@ -393,9 +456,17 @@
       "Description" : "SubnetId of the public subnet",
       "Value" :  { "Ref" : "PublicSubnet" }
     },
-    "DNSName" : {
-      "Description" : "DNS Name of the EC2 host",
-      "Value" :  { "Fn::GetAtt" : ["EC2Host", "PublicDnsName"] }
+     "PrivateSubnet" : {
+      "Description" : "SubnetId of the private subnet",
+      "Value" :  { "Ref" : "PrivateSubnet" }
+    },
+    "DNSNameJumpHost" : {
+      "Description" : "DNS Name of the EC2 jumphost",
+      "Value" :  { "Fn::GetAtt" : ["EC2JumpHost", "PublicDnsName"] }
+    },
+    "DNSNameNATInstance" : {
+      "Description" : "DNS Name of the EC2 jumphost",
+      "Value" :  { "Fn::GetAtt" : ["NATDevice", "PublicDnsName"] }
     }
   }
 }

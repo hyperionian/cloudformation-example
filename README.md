@@ -1,4 +1,4 @@
-# cloudform for AWS
+# Cloudform for AWS
 
-This CF template is to create a new VPC with private DNS name, a NAT instance, with 1 public and 1 private subnet.
+AWS CloudFormation template to create a VPC with 2 subnets, NAT gateway, EC2 jumphost, and private hosted DNS on AWS Route 53. This template creates AWS resources at Scale. You will be billed for the AWS resources used if you create a stack from this template",
 
