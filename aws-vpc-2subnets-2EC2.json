@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "AWS CloudFormation template to create a VPC with 2 subnets, NAT gateway, EC2 jumphost, and private hosted DNS on AWS Route 53. This template creates AWS resources. You will be billed for the AWS resources used if you create a stack from this template",
+  "Description" : "AWS CloudFormation template to create a VPC with 2 subnets, NAT gateway, EC2 jumphost, and private hosted DNS on AWS Route 53. This template creates AWS resources. You will be billed for the AWS resources used if you create a stack from this template.",
    "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -403,7 +403,7 @@
         "KeyName"  : { "Ref" : "KeyName" },
          "SourceDestCheck": "false",
         "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2NATAMI", { "Ref" : "AWS::Region" }, 
-                         { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2NATInstanceType" }, "Arch" ] } ] },
+                         { "Fn::FindInMap" : [ "AWSInstanceType2NATArch", { "Ref" : "EC2NATInstanceType" }, "Arch" ] } ] },
         "NetworkInterfaces" : [{
           "GroupSet"                 : [{ "Ref" : "NATSecurityGroup" }],
           "AssociatePublicIpAddress" : "true",
