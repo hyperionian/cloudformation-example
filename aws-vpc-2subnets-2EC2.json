@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "AWS CloudFormation template to create a VPC with 2 subnets, NAT gateway, EC2 jumphost, and private hosted DNS on AWS Route 53. This template creates AWS resources. You will be billed for the AWS resources used if you create a stack from this template",
+  "Description" : "AWS CloudFormation template to create a VPC with 2 subnets, NAT gateway, EC2 jumphost, and private hosted DNS on AWS Route 53. This template creates AWS resources. You will be billed for the AWS resources used if you create a stack from this template.",
    "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -248,7 +248,7 @@
     "CustomDHCPOptionAssociation" : {
         "Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
         "Properties" : {
-          "VPCId" : {"Ref" : "VPC"},
+          "VpcId" : {"Ref" : "VPC"},
           "DhcpOptionsId" : {"Ref" : "CustomDHCPOptions"}
          }
     },
@@ -275,7 +275,7 @@
     "PublicSubnet" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
-        "VPCId" : { "Ref" : "VPC" },
+        "VpcId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
@@ -287,7 +287,7 @@
    "PrivateSubnet" : {
       "Type" : "AWS::EC2::Subnet",
       "Properties" : {
-        "VPCId" : { "Ref" : "VPC" },
+        "VpcId" : { "Ref" : "VPC" },
         "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Private", "CIDR" ]},
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
@@ -309,7 +309,7 @@
     "GatewayToInternet" : {
        "Type" : "AWS::EC2::VPCGatewayAttachment",
        "Properties" : {
-         "VPCId" : { "Ref" : "VPC" },
+         "VpcId" : { "Ref" : "VPC" },
          "InternetGatewayId" : { "Ref" : "InternetGateway" }
        }
     },
@@ -317,7 +317,7 @@
     "PublicRouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
-        "VPCId" : { "Ref" : "VPC" },
+        "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
           { "Key" : "Network", "Value" : "Public" }
@@ -346,7 +346,7 @@
     "PrivateRouteTable" : {
       "Type" : "AWS::EC2::RouteTable",
       "Properties" : {
-        "VPCId" : { "Ref" : "VPC" },
+        "VpcId" : { "Ref" : "VPC" },
         "Tags" : [
           { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
           { "Key" : "Network", "Value" : "Private" }
@@ -367,7 +367,7 @@
    "PrivateSubnetRouteTableAssociation" : {
       "Type" : "AWS::EC2::SubnetRouteTableAssociation",
       "Properties" : {
-        "SubnetId" : { "Ref" : "PrivateRouteTable" },
+        "SubnetId" : { "Ref" : "PrivateSubnet" },
         "RouteTableId" : { "Ref" : "PrivateRouteTable" }
       }
     },
@@ -387,7 +387,7 @@
         "VpcId" : { "Ref" : "VPC" },
         "SecurityGroupIngress" : [
           { "IpProtocol" : "tcp", "FromPort" : "0",  "ToPort" : "65535",  "CidrIp" : "10.0.0.0/16" },
-          { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0/16" } ,
+          { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/16" } ,
           { "IpProtocol" : "icmp", "FromPort" : "-1",  "ToPort" : "-1",  "CidrIp" : "10.0.0.0/16" }
         ]
        
@@ -398,12 +398,11 @@
       "Type" : "AWS::EC2::Instance",
       "DependsOn" : "GatewayToInternet",
       "Properties" : {
-        "GroupDescription" : "NAT Instance",
         "InstanceType" : { "Ref" : "EC2NATInstanceType" },
         "KeyName"  : { "Ref" : "KeyName" },
          "SourceDestCheck": "false",
         "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2NATAMI", { "Ref" : "AWS::Region" }, 
-                         { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2NATInstanceType" }, "Arch" ] } ] },
+                         { "Fn::FindInMap" : [ "AWSInstanceType2NATArch", { "Ref" : "EC2NATInstanceType" }, "Arch" ] } ] },
         "NetworkInterfaces" : [{
           "GroupSet"                 : [{ "Ref" : "NATSecurityGroup" }],
           "AssociatePublicIpAddress" : "true",
