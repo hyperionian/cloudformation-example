@@ -7,7 +7,7 @@
 The templates create the following infrastructure.
 
 ### VPC with NAT instance, 2 subnets, a jumphost (bastion host), and a private hosted DNS name.
-[![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprisePrivate&templateURL=https://cybersociety.s3.amazonaws.com/cf-templates/vpn-nat-jumphost.template)
+[![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprisePrivate&templateURL=http://cybersociety.s3.amazonaws.com/cf-templates/vpc-nat-jumphost.template)
 ![VPN-with-NAT-PrivateSubnet](diagrams/vpc-nat-jumphost-designer.png)
 
 ### VPC with NAT instance, 2 subnets, a jumphost (bastion host), a private hosted DNS name, and a Splunk Enterprise instance.
