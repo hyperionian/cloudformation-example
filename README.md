@@ -26,9 +26,9 @@ The templates below are included in this repository (cloudform)
 
 | Template | Description |
 | --- | --- | 
-| [master_infrastructure.template](master_infrastructure.template) | This is the master template - deploy it to CloudFormation and it will also launch another netsted stack to launch a Splunk Enterprise Instance. This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets|
-| [splunk_server.template](splunk_server.template) | This template deploys a Splunk Enterprise instance launched by [master_infrastructure.template](master_infrastructure.template) with required [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html)|
-| [vpc-nat-jumphost.template](vpc-nat-jumphost.template)| This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets without launching a Splunk Enterprise instance so this stack can be used to as the infrastructure stack for simple workloads.|
+| [master_infrastructure.template](templates/master_infrastructure.template) | This is the master template - deploy it to CloudFormation and it will also launch another netsted stack to launch a Splunk Enterprise Instance. This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets|
+| [splunk_server.template](templates/splunk_server.template) | This template deploys a Splunk Enterprise instance launched by [master_infrastructure.template](master_infrastructure.template) with required [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html)|
+| [vpc-nat-jumphost.template](templates/vpc-nat-jumphost.template)| This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets without launching a Splunk Enterprise instance so this stack can be used to as the infrastructure stack for simple workloads.|
 
 After the CloudFormation templates have been deployed, the [stack outputs](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html) will list all required details to start to interact with bastion host, NAT instance, and Splunk Enterprise instance.
 
@@ -74,7 +74,7 @@ This set of templates deploys the following network address design:
 | Public Subnet | 10.0.0.0/24| ~4000 | The public subnet |
 | Private Subnet | 10.0.1.0/24 | ~4000 | The private subnet |
 
-You can adjust the CIDR ranges used in this section of the [master_template.template](master_infrastructure.template) template:
+You can adjust the CIDR ranges used in this section of the [master_template.template](templates/master_infrastructure.template) template:
 
 ```
 ...
