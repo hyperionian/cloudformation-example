@@ -1,4 +1,4 @@
-# Deploying a Splunk Enterprise instance in a private subnet within a VPC with a NAT instance
+# Deploying a pair of public and private subnets with a NAT instance and a Splunk Enterprise instance within a VPC 
 
 
 This Cloudformation stack can be run in ap-southeast-2 region. 
@@ -9,8 +9,10 @@ This Cloudformation stack can be run in ap-southeast-2 region.
 
 The templates create the following infrastructure.
 
+### VPC with NAT instance, 2 subnets, a jumphost (bastion host), and a private hosted DNS name.
 ![VPN-with-NAT-PrivateSubnet](diagrams/vpc-nat-jumphost-designer.png)
 
+### VPC with NAT instance, 2 subnets, a jumphost (bastion host), a private hosted DNS name, and a Splunk Enterprise instance.
 ![SplunkEnterprise-with-PrivateSubnet](diagrams/master_infrastructure-designer.png)
 
 The repository consists of a set of nested templates that deploy the following:
@@ -24,12 +26,12 @@ The repository consists of a set of nested templates that deploy the following:
  - Centralized container logging with [Amazon CloudWatch Logs](http://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html).
 
 
-#### Infrastructure-as-Code to maintain idempotency
+### Infrastructure-as-Code to maintain idempotency
 
 A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).  Templates JSON-formatted text files . With CloudFormation, you can see exactly which AWS resources make up a stack. You retain full control and have the ability to modify any of the AWS resources created as part of a stack. 
 
 
-## Template details
+### Template details
 
 The templates below are included in this repository (cloudform)
 
@@ -96,21 +98,7 @@ You can adjust the CIDR ranges used in this section of the [master_template.temp
 ...
 ```
 
-### Update an ECS service to a new Docker image version
 
-ECS has the ability to perform rolling upgrades to your ECS services to minimize downtime during deployments. For more information, see [Updating a Service](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/update-service.html).
+### Contributing
 
-To update one of your services to a new version, adjust the `Image` parameter in the service template (in [services/*](services/) to point to the new version of your container image. For example, if `1.0.0` was currently deployed and you wanted to update to `1.1.0`, you could update it as follows:
-
-```
-TaskDefinition:
-  Type: AWS::ECS::TaskDefinition
-  Properties:
-    ContainerDefinitions:
-      - Name: your-container
-        Image: registry.example.com/your-container:1.1.0
-```
-
-## Contributing
-
-See forking instruction
+See forking instruction.
