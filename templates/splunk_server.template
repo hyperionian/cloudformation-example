@@ -163,7 +163,7 @@
                          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "SplunkInstanceType" }, "Arch" ] } ] },
     "NetworkInterfaces" : [{
           "GroupSet"                 : [{ "Ref" : "SplunkSecurityGroup" }],
-          "AssociatePublicIpAddress" : "true",
+          "AssociatePublicIpAddress" : "false",
           "DeviceIndex"              : "0",
           "DeleteOnTermination"      : "true",
           "SubnetId"                 : { "Ref" : "SubnetId" }
@@ -209,7 +209,6 @@
         "export LOCALIP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)\n",
         "export INSTANCEID=$(curl http://169.254.169.254/latest/meta-data/instance-id)\n",
         "printf '%s\t%s\n' \"$LOCALIP\" 'splunk' >> /etc/hosts\n",
-        "hostname run.csd.internal\n",
         "mv /opt/splunk/etc/passwd /opt/splunk/etc/passwd.bak\n",
         "mkdir -p /opt/splunk/.splunk ; chown splunk:splunk /opt/splunk/.splunk\n",
         "mkdir -p /opt/splunk/etc/licenses/enterprise\n",
