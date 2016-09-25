@@ -4,7 +4,7 @@
 
 ## Overview
 
-The templates create the following infrastructure.
+At the moment, this template launch stacks from ap-southeast-2 region and they create the following infrastructure.
 
 ### VPC with NAT instance, 2 subnets, a jumphost (bastion host), and a private hosted DNS name.
 [![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprisePrivate&templateURL=http://cybersociety.s3.amazonaws.com/cf-templates/vpc-nat-jumphost.template)
@@ -63,6 +63,39 @@ By default, [Amazon Linux AMI](https://aws.amazon.com/amazon-linux-ami/) instanc
     ...
 ```
 
+### Change the S3 bucket and template name
+
+This [master_infrastructure.template](templates/master_infrastructure.template) deploys the the stack from a S3 bucket named cybersociety in ap-southeast-e region. You can modify the S3 bucket name and the additional template files for subsequent nested stack created by [master_infrastructure.template](templates/master_infrastructure.template) by changing this section of [master_infrastructure.template](templates/master_infrastructure.template) 
+
+
+```
+...
+ "AWSRegion2s3Bucket" : {
+    
+      "ap-southeast-2" : { "s3Bucket" : "https://cybersociety.s3.amazonaws.com" }
+    }
+...
+"SplunkServer" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "Metadata" : {
+        "Comment" : "Splunk Server in Private Subnet."
+      },
+      "DependsOn" : "VPC",
+      "Properties" : {
+        "TemplateURL" : { "Fn::Join" : ["/", [{ "Fn::FindInMap" : [ "AWSRegion2s3Bucket", { "Ref" : "AWS::Region" }, "s3Bucket" ]},
+                          "cf-templates", "splunk_server.template" ]]},
+        "Parameters" : {
+          "VpcId"          : { "Ref" : "VPC"},
+          "SubnetId"       : { "Ref" : "PrivateSubnet" },
+          "KeyName"        : { "Ref" : "KeyName" },
+          "SplunkAdminPassword"        : { "Ref" : "SplunkAdminPassword" },
+          "SplunkInstanceType" : { "Ref" : "SplunkInstanceType"}
+        }
+      }
+    }
+...
+
+```
 
 ### Change the VPC or subnet IP ranges
 
