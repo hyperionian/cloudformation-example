@@ -6,11 +6,11 @@
 This template launch stacks with the following infrastructure depending on the options chosen during the CF stack creations.
 
 ### VPC with NAT instance, 2 subnets, a jumphost (bastion host), and a private hosted DNS name.
-[![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprisePrivate&templateURL=http://cybersociety.s3.amazonaws.com/cf-templates/vpc-nat-jumphost.template)
+[![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=VPC-NAT&templateURL=http://cybersociety.s3.amazonaws.com/cf-templates/vpc-nat-jumphost.template)
 ![VPN-with-NAT-PrivateSubnet](diagrams/vpc-nat-jumphost-designer.png)
 
 ### VPC with NAT instance, 2 subnets, a jumphost (bastion host), a private hosted DNS name, and a Splunk Enterprise instance.
-[![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprisePrivate&templateURL=https://cybersociety.s3.amazonaws.com/cf-templates/master_infrastructure.template)  
+[![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprise-Private&templateURL=https://cybersociety.s3.amazonaws.com/cf-templates/master_infrastructure.template)  
 ![SplunkEnterprise-with-PrivateSubnet](diagrams/master_infrastructure-designer.png)
 
 
@@ -85,6 +85,33 @@ You can adjust the CIDR ranges used in this section of the [master_template.temp
 ...
 ```
 
+### Change the S3 bucket and template name
+
+This [master_infrastructure.template](templates/master_infrastructure.template) deploys the the stack from a S3 bucket named cybersociety in ap-southeast-2 region. You can modify the S3 bucket name and the additional template files for subsequent nested stack created by [master_infrastructure.template](templates/master_infrastructure.template) by changing this section of [master_infrastructure.template](templates/master_infrastructure.template) 
+
+
+```
+...
+"SplunkServer" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "Metadata" : {
+        "Comment" : "Splunk Server in Private Subnet."
+      },
+      "DependsOn" : "VPC",
+      "Properties" : {
+        "TemplateURL" : "https://cybersociety.s3.amazonaws.com/cf-templates/splunk_server.template",
+        "Parameters" : {
+          "VpcId"          : { "Ref" : "VPC"},
+          "SubnetId"       : { "Ref" : "PrivateSubnet" },
+          "KeyName"        : { "Ref" : "KeyName" },
+          "SplunkAdminPassword"        : { "Ref" : "SplunkAdminPassword" },
+          "SplunkInstanceType" : { "Ref" : "SplunkInstanceType"}
+        }
+      }
+    }
+...
+
+```
 
 ### Contributing
 
