@@ -535,8 +535,7 @@
       },
       "DependsOn" : "VPC",
       "Properties" : {
-        "TemplateURL" : { "Fn::Join" : ["/", [{ "Fn::FindInMap" : [ "AWSRegion2s3Bucket", { "Ref" : "AWS::Region" }, "s3Bucket" ]},
-                          "cf-templates", "splunk_server.template" ]]},
+        "TemplateURL" : "https://cybersociety.s3.amazonaws.com/cf-templates/splunk_server.template",
         "Parameters" : {
           "VpcId"          : { "Ref" : "VPC"},
           "SubnetId"       : { "Ref" : "PrivateSubnet" },
