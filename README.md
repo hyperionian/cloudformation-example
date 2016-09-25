@@ -1,10 +1,9 @@
-# Deploying a pair of public and private subnets with a NAT instance and a Splunk Enterprise instance within a VPC 
-
+# Deploying a pair of public and private subnets with a NAT instance, and an optionally Splunk Enterprise instance within a VPC.
 
 
 ## Overview
 
-At the moment, this template launch stacks from ap-southeast-2 region and they create the following infrastructure.
+This template launch stacks with the following infrastructure depending on the options chosen during the CF stack creations.
 
 ### VPC with NAT instance, 2 subnets, a jumphost (bastion host), and a private hosted DNS name.
 [![cloudformation-launch-stack](diagrams/stack-launch.png)](https://console.aws.amazon.com/cloudformation/home?region=ap-southeast-2#/stacks/new?stackName=SplunkEnterprisePrivate&templateURL=http://cybersociety.s3.amazonaws.com/cf-templates/vpc-nat-jumphost.template)
@@ -26,9 +25,9 @@ The templates below are included in this repository (cloudform)
 
 | Template | Description |
 | --- | --- | 
-| [master_infrastructure.template](templates/master_infrastructure.template) | This is the master template - deploy it to CloudFormation and it will also launch another netsted stack to launch a Splunk Enterprise Instance. This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets|
-| [splunk_server.template](templates/splunk_server.template) | This template deploys a Splunk Enterprise instance launched by [master_infrastructure.template](templates/master_infrastructure.template) with required [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html)|
-| [vpc-nat-jumphost.template](templates/vpc-nat-jumphost.template)| This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets without launching a Splunk Enterprise instance so this stack can be used to as the infrastructure stack for simple workloads.|
+| [master_infrastructure.template](templates/master_infrastructure.template) | This is the master template - deploy it to AWS CloudFormation and it will also launch another netsted stack to launch a Splunk Enterprise Instance if Splunk instance creation is opted. This template also deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53 if the private DNS name is provided during stack creation, a bastion host, and default routes for them in the private subnets|
+| [splunk_server.template](templates/splunk_server.template) | This template deploys a Splunk Enterprise instance launched by [master_infrastructure.template](templates/master_infrastructure.template) with required [security groups](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_SecurityGroups.html) when Splunk instance creation is opted|
+| [vpc-nat-jumphost.template](templates/vpc-nat-jumphost.template)| This template deploys a VPC with a pair of public and private subnets in an Availability Zone. It deploys an [Internet gateway](http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Internet_Gateway.html), with a default route on the public subnets. It deploys a NAT instance, private hosted DNS name in AWS Route 53, a bastion host, and default routes for them in the private subnets without launching a Splunk Enterprise instance so this stack can be used to as the infrastructure stack for simple workloads|
 
 After the CloudFormation templates have been deployed, the [stack outputs](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html) will list all required details to start to interact with bastion host, NAT instance, and Splunk Enterprise instance.
 
@@ -61,40 +60,6 @@ By default, [Amazon Linux AMI](https://aws.amazon.com/amazon-linux-ami/) instanc
       "cn-north-1"       : {"PV64" : "ami-77559f1a", "HVM64" : "ami-8e6aa0e3", "HVMG2" : "NOT_SUPPORTED"}
     },
     ...
-```
-
-### Change the S3 bucket and template name
-
-This [master_infrastructure.template](templates/master_infrastructure.template) deploys the the stack from a S3 bucket named cybersociety in ap-southeast-e region. You can modify the S3 bucket name and the additional template files for subsequent nested stack created by [master_infrastructure.template](templates/master_infrastructure.template) by changing this section of [master_infrastructure.template](templates/master_infrastructure.template) 
-
-
-```
-...
- "AWSRegion2s3Bucket" : {
-    
-      "ap-southeast-2" : { "s3Bucket" : "https://cybersociety.s3.amazonaws.com" }
-    }
-...
-"SplunkServer" : {
-      "Type" : "AWS::CloudFormation::Stack",
-      "Metadata" : {
-        "Comment" : "Splunk Server in Private Subnet."
-      },
-      "DependsOn" : "VPC",
-      "Properties" : {
-        "TemplateURL" : { "Fn::Join" : ["/", [{ "Fn::FindInMap" : [ "AWSRegion2s3Bucket", { "Ref" : "AWS::Region" }, "s3Bucket" ]},
-                          "cf-templates", "splunk_server.template" ]]},
-        "Parameters" : {
-          "VpcId"          : { "Ref" : "VPC"},
-          "SubnetId"       : { "Ref" : "PrivateSubnet" },
-          "KeyName"        : { "Ref" : "KeyName" },
-          "SplunkAdminPassword"        : { "Ref" : "SplunkAdminPassword" },
-          "SplunkInstanceType" : { "Ref" : "SplunkInstanceType"}
-        }
-      }
-    }
-...
-
 ```
 
 ### Change the VPC or subnet IP ranges
