@@ -234,10 +234,15 @@
       "cn-north-1"       : {"NATPV64" : "NOT SUPPORTED", "NATHVM64" : "NOT SUPPORTED", "HVMG2" : "NOT_SUPPORTED"}
     }
   },
+
+  "Conditions" : {
+    "CreatePrivateDNSNames" : {"Fn::Not" : [{"Fn::Equals" : [{"Ref" : "PrivateHostedZoneName"}, ""]}] }
+  },
   
   "Resources" : {
      "CustomDHCPOptions" : {
          "Type" : "AWS::EC2::DHCPOptions",
+         "Condition" : "CreatePrivateDNSNames",
          "Properties" : {
             "DomainName" : { "Ref" : "PrivateHostedZoneName" },
             "DomainNameServers" : [ "AmazonProvidedDNS" ],
@@ -260,6 +265,7 @@
       
     "CustomDHCPOptionAssociation" : {
         "Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
+        "Condition" : "CreatePrivateDNSNames",
         "Properties" : {
           "VpcId" : {"Ref" : "VPC"},
           "DhcpOptionsId" : {"Ref" : "CustomDHCPOptions"}
@@ -268,6 +274,7 @@
 
     "DNS": {
         "Type": "AWS::Route53::HostedZone",
+        "Condition" : "CreatePrivateDNSNames",
         "Properties": {
             "HostedZoneConfig": {
             "Comment": "Lab custom private DNS zone"
